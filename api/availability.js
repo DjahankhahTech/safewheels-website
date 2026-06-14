@@ -12,8 +12,8 @@ const CAL_ICS_URL = process.env.CAL_ICS_URL ||
   "https://calendar.google.com/calendar/ical/safewheelsrentals%40gmail.com/public/basic.ics";
 
 const FLEET = [
-  { name: "Kia Telluride 2021",     type: "SUV",         seats: "7–8", rate: 59, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/kia/telluride/2901165" },
-  { name: "Nissan Pathfinder 2025", type: "SUV",         seats: "7",   rate: 65, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/nissan/pathfinder/3345597" },
+  { name: "Kia Telluride 2021",     type: "SUV",         seats: "7–8", rate: 78, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/kia/telluride/2901165" },
+  { name: "Nissan Pathfinder 2025", type: "SUV",         seats: "7",   rate: 72, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/nissan/pathfinder/3345597" },
   { name: "Hyundai Santa Fe 2025",  type: "SUV",         seats: "5",   rate: 62, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/hyundai/santa-fe/2979761" },
   { name: "Chevrolet Traverse 2019",type: "SUV",         seats: "7–8", rate: 60, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/chevrolet/traverse/2939523" },
   { name: "Jeep Wrangler 2025",     type: "SUV",         seats: "4–5", rate: 72, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/jeep/wrangler/3343831" },
