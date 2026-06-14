@@ -1,0 +1,33 @@
+{
+  "posts": [
+    {
+      "slug": "sanibel-captiva-day-guide",
+      "title": "A Day on Sanibel & Captiva: Beaches, Shells & Scenic Drives",
+      "category": "Local Guide",
+      "excerpt": "Plan the perfect island day trip — causeway tips, the best shelling beaches, and where to stop for lunch.",
+      "published": true,
+      "publishedDate": "June 14, 2026"
+    },
+    {
+      "slug": "boca-grande-getaway",
+      "title": "Boca Grande Getaway: Old-Florida Charm on Gasparilla Island",
+      "category": "Local Guide",
+      "excerpt": "Golf carts, tarpon, and a historic lighthouse — how to spend a laid-back day on Gasparilla Island.",
+      "published": false
+    },
+    {
+      "slug": "snowbird-season-driving",
+      "title": "Snowbird Season in SWFL: A Newcomer's Driving & Parking Guide",
+      "category": "Travel Tips",
+      "excerpt": "New to wintering on the Gulf Coast? What to know about seasonal traffic, parking, and getting around.",
+      "published": false
+    },
+    {
+      "slug": "gulf-coast-sunsets",
+      "title": "Where to Catch the Best Gulf Coast Sunsets Near Cape Coral",
+      "category": "Local Guide",
+      "excerpt": "From the Yacht Club Beach to Fort Myers Beach — the best spots and times for a Gulf Coast sunset.",
+      "published": false
+    }
+  ]
+}
