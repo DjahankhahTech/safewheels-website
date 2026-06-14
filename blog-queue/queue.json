@@ -13,7 +13,8 @@
       "title": "Boca Grande Getaway: Old-Florida Charm on Gasparilla Island",
       "category": "Local Guide",
       "excerpt": "Golf carts, tarpon, and a historic lighthouse — how to spend a laid-back day on Gasparilla Island.",
-      "published": false
+      "published": true,
+      "publishedDate": "June 14, 2026"
     },
     {
       "slug": "snowbird-season-driving",
