@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://safewheelsrentalsswfl.com/sitemap.xml
