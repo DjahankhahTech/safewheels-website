@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Check Availability — SafeWheels Rentals SWFL</title>
+  <meta name="description" content="See which SafeWheels Rentals SWFL vehicles are available for your dates. Enter your pickup and return times and location to check live availability.">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .av-form { background:#fff; border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:24px; max-width:760px; margin:0 auto; }
+    .av-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .av-field { display:flex; flex-direction:column; gap:6px; }
+    .av-field.full { grid-column:1 / -1; }
+    .av-field label { font-weight:700; font-size:.9rem; }
+    .av-field input, .av-field select { padding:11px 12px; border:1px solid #cfc8bc; border-radius:10px; font-size:1rem; font-family:inherit; background:#fff; }
+    .av-note { color:var(--muted); font-size:.88rem; margin:14px 0 0; }
+    .av-actions { margin-top:18px; }
+    .av-msg { max-width:760px; margin:20px auto 0; }
+    .av-msg.error { color:#9a3412; background:#fff4ec; border-left:4px solid #e6731b; padding:12px 16px; border-radius:8px; }
+    .av-summary { text-align:center; margin:8px auto 24px; color:var(--muted); }
+    .spinner { display:inline-block; }
+    @media (max-width:620px){ .av-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="index.html"><img src="img/logo-transparent.png" alt="SafeWheels Rentals SWFL logo" class="logo-img"><span class="brand-text">SafeWheels Rentals SWFL</span></a>
+      <div class="nav-links">
+        <a class="navlink" href="availability.html">Availability</a>
+        <a class="navlink" href="about.html">About</a>
+        <a class="navlink" href="rental-agreement.html">Rental Agreement</a>
+        <a class="navlink" href="cancellation.html">Cancellation</a>
+        <a class="navlink" href="blog.html">Blog</a>
+        <a class="btn" href="https://turo.com/us/en/drivers/795431" target="_blank" rel="noopener">Book Now</a>
+      </div>
+    </nav>
+  </header>
+
+  <div class="page-hero"><div class="wrap"><h1>Check Availability</h1><p>Enter your trip dates and location to see which vehicles are open. Reserve your pick on Turo.</p></div></div>
+
+  <section>
+    <div class="wrap">
+      <form class="av-form" id="avForm">
+        <div class="av-grid">
+          <div class="av-field">
+            <label for="start">Pick-up date &amp; time</label>
+            <input type="datetime-local" id="start" required>
+          </div>
+          <div class="av-field">
+            <label for="end">Return date &amp; time</label>
+            <input type="datetime-local" id="end" required>
+          </div>
+          <div class="av-field full">
+            <label for="location">Pick-up / delivery location</label>
+            <select id="location">
+              <option value="Punta Gorda Airport (PGD)">Punta Gorda Airport (PGD)</option>
+              <option value="Fort Myers — RSW Airport (RSW)">Fort Myers — RSW Airport (RSW)</option>
+              <option value="Punta Gorda">Punta Gorda</option>
+              <option value="address">Other address (delivery)</option>
+            </select>
+          </div>
+          <div class="av-field full" id="addressWrap" style="display:none;">
+            <label for="address">Delivery address</label>
+            <input type="text" id="address" placeholder="Street, City, FL ZIP — within 50 miles of 33955" autocomplete="off">
+          </div>
+        </div>
+        <p class="av-note">⏱ Trips must start at least <strong>12 hours</strong> from now. We serve PGD &amp; RSW airports, Punta Gorda, and delivery within 50 miles of 33955. All reservations are completed on Turo — your exact pick-up address is shared through Turo once your booking is confirmed.</p>
+        <div class="av-actions"><button type="submit" class="btn" id="avBtn">See available vehicles</button></div>
+      </form>
+
+      <div id="avMsg" class="av-msg"></div>
+      <div id="avSummary" class="av-summary"></div>
+      <div id="avResults" class="grid grid-3" style="margin-top:10px;"></div>
+    </div>
+  </section>
+
+  <footer class="site-footer">
+    <div class="wrap footer-grid">
+      <div><h4>SafeWheels Rentals SWFL</h4><p>A family business serving Southwest Florida with quality cars and top-notch customer service. Turo All-Star Host.</p></div>
+      <div><h4>Policies</h4><ul>
+        <li><a href="about.html">About</a></li>
+        <li><a href="rental-agreement.html">Rental Agreement</a></li>
+        <li><a href="cancellation.html">Cancellation</a></li>
+        <li><a href="guest-incident-procedure.html">Guest Incident Procedure</a></li>
+        <li><a href="privacy.html">Privacy Policy</a></li>
+      </ul></div>
+      <div><h4>Contact</h4><ul>
+        <li><a href="tel:+16574321456">+1 (657) 432-1456</a></li>
+        <li><a href="mailto:safewheelsrentals@gmail.com">safewheelsrentals@gmail.com</a></li>
+        <li>Serving PGD &amp; RSW airports<br>Delivery within 50 mi of 33955</li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom wrap">© 2026 SafeWheels Rentals SWFL. All rights reserved.</div>
+  </footer>
+
+  <script>
+    const TURO = "https://turo.com/us/en/drivers/795431";
+    const pad = (n) => String(n).padStart(2, "0");
+    const toLocalInput = (d) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    const startEl = document.getElementById("start");
+    const endEl = document.getElementById("end");
+    // Default pick-up = at least 12 hours out (rounded up to the next hour);
+    // default return = 7 days after pick-up, and it follows the pick-up time.
+    const DAY = 24 * 60 * 60 * 1000;
+    const earliest = new Date(Date.now() + 12 * 60 * 60 * 1000);
+    earliest.setMinutes(0, 0, 0);
+    earliest.setHours(earliest.getHours() + 1); // round up -> 12–13h ahead, never under 12h
+    startEl.min = toLocalInput(earliest);
+    startEl.value = toLocalInput(earliest);
+    const syncEnd = (s) => {
+      endEl.min = toLocalInput(new Date(s.getTime() + 60 * 60 * 1000));
+      endEl.value = toLocalInput(new Date(s.getTime() + 7 * DAY));
+    };
+    syncEnd(earliest);
+    startEl.addEventListener("change", () => {
+      const s = new Date(startEl.value);
+      if (!isNaN(s)) syncEnd(s);
+    });
+
+    const locEl = document.getElementById("location");
+    const addressWrap = document.getElementById("addressWrap");
+    locEl.addEventListener("change", () => {
+      addressWrap.style.display = locEl.value === "address" ? "flex" : "none";
+    });
+
+    const msg = document.getElementById("avMsg");
+    const summary = document.getElementById("avSummary");
+    const results = document.getElementById("avResults");
+    const btn = document.getElementById("avBtn");
+
+    const fmt = (iso) => new Date(iso).toLocaleString([], { weekday:"short", month:"short", day:"numeric", hour:"numeric", minute:"2-digit" });
+
+    document.getElementById("avForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.className = "av-msg"; msg.textContent = "";
+      summary.textContent = ""; results.innerHTML = "";
+
+      const s = new Date(startEl.value), en = new Date(endEl.value);
+      if (isNaN(s) || isNaN(en)) { showError("Please choose a valid start and end time."); return; }
+      if (s.getTime() < Date.now() + 12*60*60*1000) { showError("Reservations must start at least 12 hours from now."); return; }
+      if (en <= s) { showError("Your return time must be after your pick-up time."); return; }
+
+      let loc = locEl.value;
+      if (loc === "address") {
+        const addr = document.getElementById("address").value.trim();
+        if (!addr) { showError("Please enter your delivery address (within 50 miles of 33955)."); return; }
+        loc = "Delivery: " + addr;
+      }
+
+      btn.disabled = true; btn.textContent = "Checking…";
+      try {
+        const qs = new URLSearchParams({ start: s.toISOString(), end: en.toISOString(), location: loc });
+        const r = await fetch("/api/availability?" + qs.toString());
+        const data = await r.json();
+        if (!r.ok) { showError(data.error || "Could not check availability right now."); return; }
+        render(data);
+      } catch (err) {
+        showError("Could not check availability right now. Please try again, or book directly on Turo.");
+      } finally {
+        btn.disabled = false; btn.textContent = "See available vehicles";
+      }
+    });
+
+    function showError(text) { msg.className = "av-msg error"; msg.textContent = text; }
+
+    function render(data) {
+      const n = data.available.length;
+      if (n === 0) {
+        summary.innerHTML = `Sorry — no vehicles are open for <strong>${fmt(data.start)} → ${fmt(data.end)}</strong>. Try different dates.`;
+        return;
+      }
+      summary.innerHTML = `<strong>${n}</strong> vehicle${n>1?"s":""} available for <strong>${fmt(data.start)} → ${fmt(data.end)}</strong> · ${data.location}`;
+      results.innerHTML = data.available.map((v) => `
+        <div class="fleet-card">
+          <img src="img/fleet/${slug(v.name)}.jpg" alt="${v.name}" loading="lazy" onerror="this.style.display='none'">
+          <div class="fleet-body">
+            <h3>${v.name}</h3>
+            <div class="fleet-meta">${v.type} · seats ${v.seats}</div>
+            <div class="fleet-rate">from <span class="amt">$${v.rate}</span>/day</div>
+            <p style="margin-top:12px;"><a class="btn" href="${TURO}" target="_blank" rel="noopener">Book on Turo</a></p>
+          </div>
+        </div>`).join("");
+    }
+
+    function slug(name) {
+      return name.toLowerCase()
+        .replace("chevrolet", "chevy")
+        .replace(/\s\d{4}$/, "")
+        .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    }
+  </script>
+</body>
+</html>
