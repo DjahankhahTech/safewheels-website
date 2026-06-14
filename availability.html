@@ -179,7 +179,7 @@
             <h3>${v.name}</h3>
             <div class="fleet-meta">${v.type} · seats ${v.seats}</div>
             <div class="fleet-rate">from <span class="amt">$${v.rate}</span>/day</div>
-            <p style="margin-top:12px;"><a class="btn" href="${TURO}" target="_blank" rel="noopener">Book on Turo</a></p>
+            <p style="margin-top:12px;"><a class="btn" href="${v.book || TURO}" target="_blank" rel="noopener">Book this car on Turo</a></p>
           </div>
         </div>`).join("");
     }

@@ -115,3 +115,7 @@ section { padding: 66px 0; }
   .footer-grid { grid-template-columns: 1fr; }
   section { padding: 48px 0; }
 }
+
+/* clickable fleet cards */
+a.fleet-card { text-decoration: none; color: inherit; }
+a.fleet-card:hover { text-decoration: none; transform: translateY(-3px); transition: transform .12s ease; box-shadow: 0 12px 30px rgba(33,29,23,.16); }

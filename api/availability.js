@@ -12,15 +12,15 @@ const CAL_ICS_URL = process.env.CAL_ICS_URL ||
   "https://calendar.google.com/calendar/ical/safewheelsrentals%40gmail.com/public/basic.ics";
 
 const FLEET = [
-  { name: "Kia Telluride 2021",     type: "SUV",         seats: "7–8", rate: 80 },
-  { name: "Nissan Pathfinder 2025", type: "SUV",         seats: "7",   rate: 65 },
-  { name: "Hyundai Santa Fe 2025",  type: "SUV",         seats: "5",   rate: 55 },
-  { name: "Chevrolet Traverse 2019",type: "SUV",         seats: "7–8", rate: 55 },
-  { name: "Jeep Wrangler 2025",     type: "SUV",         seats: "4–5", rate: 70 },
-  { name: "Hyundai Kona 2021",      type: "Compact SUV", seats: "5",   rate: 45 },
-  { name: "Kia K4 2025",            type: "Sedan",       seats: "5",   rate: 45 },
-  { name: "Hyundai Elantra 2024",   type: "Sedan",       seats: "5",   rate: 45 },
-  { name: "Nissan Sentra 2025",     type: "Sedan",       seats: "5",   rate: 45 },
+  { name: "Kia Telluride 2021",     type: "SUV",         seats: "7–8", rate: 80, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/kia/telluride/2901165" },
+  { name: "Nissan Pathfinder 2025", type: "SUV",         seats: "7",   rate: 65, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/nissan/pathfinder/3345597" },
+  { name: "Hyundai Santa Fe 2025",  type: "SUV",         seats: "5",   rate: 55, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/hyundai/santa-fe/2979761" },
+  { name: "Chevrolet Traverse 2019",type: "SUV",         seats: "7–8", rate: 55, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/chevrolet/traverse/2939523" },
+  { name: "Jeep Wrangler 2025",     type: "SUV",         seats: "4–5", rate: 70, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/jeep/wrangler/3343831" },
+  { name: "Hyundai Kona 2021",      type: "Compact SUV", seats: "5",   rate: 45, book: "https://turo.com/us/en/suv-rental/united-states/cape-coral-fl/hyundai/kona/2900729" },
+  { name: "Kia K4 2025",            type: "Sedan",       seats: "5",   rate: 45, book: "https://turo.com/us/en/car-rental/united-states/cape-coral-fl/kia/k4/3368517" },
+  { name: "Hyundai Elantra 2024",   type: "Sedan",       seats: "5",   rate: 45, book: "https://turo.com/us/en/car-rental/united-states/cape-coral-fl/hyundai/elantra/2990653" },
+  { name: "Nissan Sentra 2025",     type: "Sedan",       seats: "5",   rate: 45, book: "https://turo.com/us/en/car-rental/united-states/cape-coral-fl/nissan/sentra/3345686" },
 ];
 
 const TURO = "https://turo.com/us/en/drivers/795431";
@@ -93,7 +93,7 @@ function computeAvailability(events, sMs, eMs) {
       if (v) booked.add(v);
     }
   }
-  const available = FLEET.filter((f) => !booked.has(f.name)).map((f) => ({ ...f, book: TURO }));
+  const available = FLEET.filter((f) => !booked.has(f.name)).map((f) => ({ ...f, book: f.book || TURO }));
   const unavailable = FLEET.filter((f) => booked.has(f.name)).map((f) => f.name);
   return { available, unavailable };
 }
