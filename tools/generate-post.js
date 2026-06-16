@@ -72,7 +72,7 @@ async function maybeIgInspiration() {
   try {
     const c = await creds();
     if (!c) return [];
-    const media = await recentMedia({ userId: c.userId, token: c.token, limit: 6 });
+    const media = await recentMedia({ base: c.base, userId: c.userId, token: c.token, limit: 6 });
     return media.map((m) => m.caption).filter(Boolean);
   } catch (e) {
     console.error("Could not fetch IG inspiration (continuing without):", e.message);

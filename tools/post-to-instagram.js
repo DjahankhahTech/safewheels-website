@@ -17,7 +17,7 @@ const { publishImage, creds } = require("./instagram");
   const post = JSON.parse(fs.readFileSync(file, "utf8"));
 
   try {
-    const id = await publishImage({ userId: c.userId, token: c.token, imageUrl: post.imagePublicUrl, caption: post.igCaption });
+    const id = await publishImage({ base: c.base, userId: c.userId, token: c.token, imageUrl: post.imagePublicUrl, caption: post.igCaption });
     console.log(`Posted to Instagram (media id ${id}): ${post.title}`);
   } catch (e) {
     // Don't fail the whole workflow if IG posting hiccups — the blog is already live.
