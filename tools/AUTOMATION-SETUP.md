@@ -38,13 +38,17 @@ Instagram only allows API posting from a **Business or Creator** account linked 
      `GET /oauth/access_token?grant_type=fb_exchange_token&client_id=APPID&client_secret=SECRET&fb_exchange_token=SHORT_TOKEN`
    - Find your IG Business Account ID: `GET /me/accounts` → get the Page id, then
      `GET /{page-id}?fields=instagram_business_account`.
-5. **Add GitHub secrets** (same place as step 1):
-   - `IG_USER_ID` = the Instagram Business Account ID (numeric)
-   - `IG_ACCESS_TOKEN` = the long-lived token
-6. **Add the same two as Vercel env vars** (for the on-site feed):
-   Vercel → project `website` → Settings → Environment Variables → add `IG_USER_ID` and
-   `IG_ACCESS_TOKEN` (Production). Redeploy. The "Follow us on Instagram" grid on /blog.html
-   appears automatically once the API returns posts.
+5. **Add the GitHub secret** (same place as step 1):
+   - `META` = the long-lived access token. (The code auto-discovers the IG account ID from it,
+     so `IG_USER_ID` is optional — add it only if auto-discovery fails.)
+6. **Add `META` as a Vercel env var too** (for the on-site feed):
+   Vercel → project `website` → Settings → Environment Variables → add `META` (Production).
+   Redeploy. The "Follow us on Instagram" grid on /blog.html appears automatically once the
+   API returns posts.
+
+   > `META` must be a long-lived **access token** with `instagram_basic`,
+   > `instagram_content_publish`, `pages_show_list`, `pages_read_engagement` — NOT the App ID or
+   > App Secret. If it's the wrong value, posting and the feed will both fail.
 
 > **Token expiry:** long-lived tokens last ~60 days. Refresh before then by re-running the
 > exchange call (or set a reminder). If posting stops, a stale token is the usual cause.
