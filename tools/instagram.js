@@ -14,11 +14,30 @@ function tokenFromEnv() {
 // Returns null if the token can't see a connected IG business account.
 async function resolveUserId(token) {
   if (process.env.IG_USER_ID) return process.env.IG_USER_ID;
-  const pages = await gget("/me/accounts", { fields: "id,instagram_business_account", access_token: token });
-  for (const p of pages.data || []) {
+
+  // Detailed diagnostics so the workflow logs pinpoint the exact problem.
+  async function probe(pathname, fields) {
+    const url = new URL(GRAPH + pathname);
+    if (fields) url.searchParams.set("fields", fields);
+    url.searchParams.set("access_token", token);
+    const r = await fetch(url);
+    return { ok: r.ok, json: await r.json() };
+  }
+  console.log("--- IG diagnostic ---");
+  const me = await probe("/me", "id,name");
+  console.log("/me ->", JSON.stringify(me.json.error ? me.json : { id: me.json.id, name: me.json.name }));
+
+  const pages = await probe("/me/accounts", "id,name,instagram_business_account{id,username}");
+  if (pages.json.error) console.log("/me/accounts ERROR ->", JSON.stringify(pages.json.error));
+  const data = (pages.json && pages.json.data) || [];
+  console.log(`/me/accounts -> ${data.length} page(s):`,
+    JSON.stringify(data.map((p) => ({ page: p.name, ig: p.instagram_business_account ? p.instagram_business_account.id : null }))));
+  console.log("--- end diagnostic ---");
+
+  for (const p of data) {
     if (p.instagram_business_account && p.instagram_business_account.id) return p.instagram_business_account.id;
   }
-  throw new Error("No Instagram Business Account found on this token's Pages. Ensure @safewheels_rentals_swfl is a Business/Creator account linked to a Facebook Page, and the token has instagram_basic + pages_show_list.");
+  throw new Error("No Instagram Business Account found on this token's Pages. Ensure @safewheels_rentals_swfl is a Business/Creator account linked to a Facebook Page, and the token has instagram_basic + instagram_content_publish + pages_show_list.");
 }
 
 // Resolve {userId, token} from the environment in one call.
