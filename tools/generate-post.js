@@ -10,7 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, FLEET, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateImage } = require("./generate-image");
-const { recentMedia } = require("./instagram");
+const { recentMedia, creds } = require("./instagram");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
 
@@ -69,10 +69,10 @@ async function generate({ avoidTitles, igInspiration }) {
 }
 
 async function maybeIgInspiration() {
-  const userId = process.env.IG_USER_ID, token = process.env.IG_ACCESS_TOKEN;
-  if (!userId || !token) return [];
   try {
-    const media = await recentMedia({ userId, token, limit: 6 });
+    const c = await creds();
+    if (!c) return [];
+    const media = await recentMedia({ userId: c.userId, token: c.token, limit: 6 });
     return media.map((m) => m.caption).filter(Boolean);
   } catch (e) {
     console.error("Could not fetch IG inspiration (continuing without):", e.message);

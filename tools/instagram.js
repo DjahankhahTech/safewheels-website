@@ -1,9 +1,33 @@
 // Instagram Graph API helpers (read recent media + publish a single image post).
 // Requires an Instagram BUSINESS/CREATOR account linked to a Facebook Page,
-// plus a long-lived access token. Env:
-//   IG_USER_ID       Instagram Business Account ID (numeric)
-//   IG_ACCESS_TOKEN  long-lived page/user access token
+// plus a long-lived access token. Env (token from any of these):
+//   IG_ACCESS_TOKEN  -or-  META   long-lived access token
+//   IG_USER_ID       (optional) Instagram Business Account ID — auto-discovered if omitted
 const GRAPH = "https://graph.facebook.com/v21.0";
+
+// Read the access token from whichever env var is set (supports a single `META` secret).
+function tokenFromEnv() {
+  return process.env.IG_ACCESS_TOKEN || process.env.META || process.env.META_TOKEN || null;
+}
+
+// Discover the Instagram Business Account ID from just a token (via the linked FB Page).
+// Returns null if the token can't see a connected IG business account.
+async function resolveUserId(token) {
+  if (process.env.IG_USER_ID) return process.env.IG_USER_ID;
+  const pages = await gget("/me/accounts", { fields: "id,instagram_business_account", access_token: token });
+  for (const p of pages.data || []) {
+    if (p.instagram_business_account && p.instagram_business_account.id) return p.instagram_business_account.id;
+  }
+  throw new Error("No Instagram Business Account found on this token's Pages. Ensure @safewheels_rentals_swfl is a Business/Creator account linked to a Facebook Page, and the token has instagram_basic + pages_show_list.");
+}
+
+// Resolve {userId, token} from the environment in one call.
+async function creds() {
+  const token = tokenFromEnv();
+  if (!token) return null;
+  const userId = await resolveUserId(token);
+  return { token, userId };
+}
 
 async function gget(pathname, params) {
   const url = new URL(GRAPH + pathname);
@@ -42,4 +66,4 @@ async function publishImage({ userId, token, imageUrl, caption }) {
   return published.id;
 }
 
-module.exports = { recentMedia, publishImage };
+module.exports = { recentMedia, publishImage, creds, resolveUserId, tokenFromEnv };
