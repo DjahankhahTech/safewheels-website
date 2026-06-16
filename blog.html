@@ -51,6 +51,30 @@
     </div>
   </section>
 
+  <section id="ig-feed" style="display:none;">
+    <div class="wrap">
+      <h2 style="text-align:center;">Follow us on Instagram</h2>
+      <p style="text-align:center;color:var(--muted);margin-top:-6px;">
+        <a href="https://www.instagram.com/safewheels_rentals_swfl/" target="_blank" rel="noopener">@safewheels_rentals_swfl</a>
+      </p>
+      <div id="ig-grid" class="grid" style="grid-template-columns:repeat(4,1fr);gap:10px;margin-top:18px;"></div>
+    </div>
+  </section>
+  <script>
+    fetch('/api/instagram-feed').then(function(r){return r.json();}).then(function(j){
+      if(!j.data||!j.data.length)return;
+      var grid=document.getElementById('ig-grid');
+      j.data.slice(0,8).forEach(function(m){
+        var a=document.createElement('a');a.href=m.permalink;a.target='_blank';a.rel='noopener';
+        a.style.cssText='display:block;aspect-ratio:1/1;overflow:hidden;border-radius:10px;';
+        var img=document.createElement('img');img.src=m.image;img.alt=m.caption||'Instagram post';img.loading='lazy';
+        img.style.cssText='width:100%;height:100%;object-fit:cover;';
+        a.appendChild(img);grid.appendChild(a);
+      });
+      document.getElementById('ig-feed').style.display='';
+    }).catch(function(){});
+  </script>
+
   <footer class="site-footer">
     <div class="wrap footer-grid">
       <div><h4>SafeWheels Rentals SWFL</h4><p>A family business serving Southwest Florida with quality cars and top-notch customer service. Turo All-Star Host.</p></div>
