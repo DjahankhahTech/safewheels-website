@@ -14,7 +14,8 @@ async function generateImage(prompt) {
     const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
-      body: JSON.stringify({ model, prompt, n: 1, size: "1536x1024" }),
+      // jpeg + 1024-wide: Instagram only reliably accepts JPEG and caps width at 1440px.
+      body: JSON.stringify({ model, prompt, n: 1, size: "1024x1024", output_format: "jpeg" }),
     });
     const json = await res.json();
     if (!res.ok) { console.error("Image API error:", JSON.stringify(json).slice(0, 400)); return null; }

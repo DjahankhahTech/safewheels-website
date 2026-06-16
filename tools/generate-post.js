@@ -102,7 +102,7 @@ async function maybeIgInspiration() {
   );
   if (aiBuf) {
     fs.mkdirSync(path.join(ROOT, "img", "blog"), { recursive: true });
-    heroImg = `img/blog/${slug}.png`;
+    heroImg = `img/blog/${slug}.jpg`; // JPEG — Instagram only reliably accepts JPEG
     fs.writeFileSync(path.join(ROOT, heroImg), aiBuf);
     console.log("Used AI-generated hero image.");
   } else {
@@ -123,15 +123,16 @@ async function maybeIgInspiration() {
   fs.writeFileSync(path.join(ROOT, slug + ".html"), page);
   insertBlogCard({ slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate });
 
-  // Hand off to the Instagram step. Use the raw GitHub URL so the image is public
-  // immediately after push (no wait for the Vercel deploy).
-  const RAW = "https://raw.githubusercontent.com/DjahankhahTech/safewheels-website/main";
+  // Hand off to the Instagram step. The repo is private, so raw.githubusercontent.com
+  // isn't public — use the live (Vercel) site URL, which serves img/ publicly. The IG
+  // step waits for the new image to deploy, and falls back to the already-live fleet photo.
   const hashtags = "#SWFL #CapeCoral #FortMyers #PuntaGorda #Sanibel #Naples #TuroHost #CarRental #FloridaTravel #SnowbirdSeason";
   const igCaption = `${post.title}\n\n${post.excerpt}\n\n📖 Read it on our blog (link in bio) · 🚗 Book your SWFL ride on Turo.\n\n${hashtags}`;
   fs.writeFileSync(path.join(ROOT, "blog-queue", "last-published.json"), JSON.stringify({
     slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate,
     url: `${SITE}/${slug}.html`,
-    imagePublicUrl: `${RAW}/${heroImg}`,
+    imagePublicUrl: `${SITE}/${heroImg}`,
+    fallbackImageUrl: `${SITE}/${vehicle.img}`,
     igCaption,
   }, null, 2) + "\n");
 
