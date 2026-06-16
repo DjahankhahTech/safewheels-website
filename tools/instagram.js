@@ -87,4 +87,22 @@ async function publishImage({ base, userId, token, imageUrl, caption }) {
   return published.json.id;
 }
 
-module.exports = { creds, recentMedia, publishImage, tokenFromEnv };
+// Publish a Reel. videoUrl MUST be a public https URL to an MP4. IG processes the
+// video asynchronously, so we poll the container's status before publishing.
+async function publishReel({ base, userId, token, videoUrl, caption }) {
+  const b = base || FB;
+  const created = await call("POST", b, `/${userId}/media`, { media_type: "REELS", video_url: videoUrl, caption, access_token: token });
+  if (!created.ok) throw new Error(`reel create failed: ${JSON.stringify(created.json.error || created.json)}`);
+  const id = created.json.id;
+  for (let i = 0; i < 30; i++) {
+    await new Promise((r) => setTimeout(r, 6000));
+    const st = await call("GET", b, `/${id}`, { fields: "status_code", access_token: token });
+    if (st.json.status_code === "FINISHED") break;
+    if (st.json.status_code === "ERROR") throw new Error(`reel processing error: ${JSON.stringify(st.json)}`);
+  }
+  const published = await call("POST", b, `/${userId}/media_publish`, { creation_id: id, access_token: token });
+  if (!published.ok) throw new Error(`reel publish failed: ${JSON.stringify(published.json.error || published.json)}`);
+  return published.json.id;
+}
+
+module.exports = { creds, recentMedia, publishImage, publishReel, tokenFromEnv };

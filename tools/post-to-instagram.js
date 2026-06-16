@@ -4,7 +4,7 @@
 // there's nothing to post — the blog stays published regardless.
 const fs = require("fs");
 const path = require("path");
-const { publishImage, creds } = require("./instagram");
+const { publishImage, publishReel, creds } = require("./instagram");
 
 // Poll a public URL until it serves 200 (the new image must be deployed before IG fetches it).
 async function waitForUrl(url, timeoutMs = 330000, intervalMs = 10000) {
@@ -55,5 +55,18 @@ async function waitForUrl(url, timeoutMs = 330000, intervalMs = 10000) {
     }
     // Don't fail the whole workflow if IG posting hiccups — the blog is already live.
     console.error("Instagram cross-post failed (blog still published):", e.message);
+  }
+
+  // Also publish a Reel if one was generated and is live.
+  if (post.reelPublicUrl) {
+    console.log(`Waiting for Reel ${post.reelPublicUrl} to be publicly available…`);
+    if (await waitForUrl(post.reelPublicUrl)) {
+      try {
+        const rid = await publishReel({ base: c.base, userId: c.userId, token: c.token, videoUrl: post.reelPublicUrl, caption: post.igCaption });
+        console.log(`Posted Reel (media id ${rid}): ${post.title}`);
+      } catch (e) { console.error("Reel post failed (blog + photo still published):", e.message); }
+    } else {
+      console.error("Reel not live in time — skipping Reel post.");
+    }
   }
 })();

@@ -10,6 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, FLEET, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateImage } = require("./generate-image");
+const { generateReel } = require("./generate-reel");
 const { recentMedia, creds } = require("./instagram");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
@@ -123,6 +124,17 @@ async function maybeIgInspiration() {
   fs.writeFileSync(path.join(ROOT, slug + ".html"), page);
   insertBlogCard({ slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate, image: heroImg });
 
+  // Build an Instagram Reel from the hero image (committed alongside the post).
+  let reelPath = null;
+  try {
+    fs.mkdirSync(path.join(ROOT, "reels"), { recursive: true });
+    const rp = `reels/${slug}.mp4`;
+    if (generateReel({ imagePath: path.join(ROOT, heroImg), title: post.title, outPath: path.join(ROOT, rp) })) {
+      reelPath = rp;
+      console.log("Generated Reel:", rp);
+    }
+  } catch (e) { console.error("Reel step skipped:", e.message); }
+
   // Hand off to the Instagram step. The repo is private, so raw.githubusercontent.com
   // isn't public — use the live (Vercel) site URL, which serves img/ publicly. The IG
   // step waits for the new image to deploy, and falls back to the already-live fleet photo.
@@ -133,6 +145,7 @@ async function maybeIgInspiration() {
     url: `${SITE}/${slug}.html`,
     imagePublicUrl: `${SITE}/${heroImg}`,
     fallbackImageUrl: `${SITE}/${vehicle.img}`,
+    reelPublicUrl: reelPath ? `${SITE}/${reelPath}` : null,
     igCaption,
   }, null, 2) + "\n");
 

@@ -1,0 +1,62 @@
+// Builds a 9:16 1080x1920 ~8s Instagram Reel from the post's hero image:
+// a slow Ken-Burns zoom + the post title overlaid near the bottom, with audio
+// (assets/reel-music.mp3 if present, otherwise a silent track). Requires ffmpeg,
+// which is preinstalled on GitHub Actions ubuntu runners. Returns true on success.
+const { execFileSync } = require("child_process");
+const fs = require("fs");
+const path = require("path");
+
+// Wrap a title into short lines for the overlay.
+function wrap(text, maxChars = 22) {
+  const words = String(text).split(/\s+/);
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    if ((line + " " + w).trim().length > maxChars) { if (line) lines.push(line); line = w; }
+    else line = (line + " " + w).trim();
+  }
+  if (line) lines.push(line);
+  return lines.join("\n");
+}
+
+function generateReel({ imagePath, title, outPath }) {
+  const font = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+  const titleTxt = outPath + ".title.txt";
+  fs.writeFileSync(titleTxt, wrap(title));
+  const music = path.join(path.dirname(outPath), "..", "assets", "reel-music.mp3");
+  const hasMusic = fs.existsSync(music);
+
+  const DUR = 8, FPS = 30, frames = DUR * FPS;
+  const vf = [
+    "scale=2160:3840:force_original_aspect_ratio=increase",
+    "crop=2160:3840",
+    `zoompan=z='min(zoom+0.0007,1.16)':d=${frames}:s=1080x1920:fps=${FPS}`,
+    `drawtext=fontfile=${font}:textfile=${titleTxt}:fontcolor=white:fontsize=58:line_spacing=14:box=1:boxcolor=black@0.5:boxborderw=28:x=(w-text_w)/2:y=h-text_h-210`,
+    "format=yuv420p",
+  ].join(",");
+
+  const args = ["-y", "-i", imagePath];
+  if (hasMusic) args.push("-i", music);
+  else args.push("-f", "lavfi", "-t", String(DUR), "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
+  args.push(
+    "-vf", vf,
+    "-map", "0:v:0", "-map", "1:a:0",
+    "-t", String(DUR),
+    "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p", "-r", String(FPS),
+    "-c:a", "aac", "-b:a", "128k", "-shortest",
+    "-movflags", "+faststart",
+    outPath
+  );
+
+  try {
+    execFileSync("ffmpeg", args, { stdio: "pipe" });
+    try { fs.unlinkSync(titleTxt); } catch (_) {}
+    return true;
+  } catch (e) {
+    console.error("Reel generation failed:", e.stderr ? e.stderr.toString().slice(-600) : e.message);
+    try { fs.unlinkSync(titleTxt); } catch (_) {}
+    return false;
+  }
+}
+
+module.exports = { generateReel };
