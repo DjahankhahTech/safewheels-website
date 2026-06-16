@@ -7,7 +7,7 @@ const path = require("path");
 const { publishImage, creds } = require("./instagram");
 
 // Poll a public URL until it serves 200 (the new image must be deployed before IG fetches it).
-async function waitForUrl(url, timeoutMs = 210000, intervalMs = 10000) {
+async function waitForUrl(url, timeoutMs = 330000, intervalMs = 10000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     try {
