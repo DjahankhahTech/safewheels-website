@@ -98,7 +98,7 @@ async function maybeIgInspiration() {
   // Hero image: AI-generated if enabled, otherwise the real fleet photo for the vehicle.
   let heroImg = vehicle.img;
   const aiBuf = await generateImage(
-    `${post.heroImagePrompt}. Photorealistic, bright Southwest Florida daylight, wide landscape composition, no text, no watermark, no logos, no license plates.`
+    `${post.heroImagePrompt}. Professional travel photograph shot on a full-frame DSLR with a 35mm lens, natural golden-hour Southwest Florida daylight, photorealistic with sharp focus, realistic textures, true-to-life colors and subtle depth of field — like a real travel-magazine photo. NOT an illustration, painting, cartoon, or 3D render. No text, no watermark, no logos, no readable license plates.`
   );
   if (aiBuf) {
     fs.mkdirSync(path.join(ROOT, "img", "blog"), { recursive: true });
