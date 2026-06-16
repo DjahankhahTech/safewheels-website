@@ -115,14 +115,15 @@ ${bodyHtml}
 }
 
 // Insert a card at the top of the blog index grid.
-function insertBlogCard({ slug, title, excerpt, category, pubdate }) {
+function insertBlogCard({ slug, title, excerpt, category, pubdate, image }) {
   const blogPath = path.join(ROOT, "blog.html");
   let blog = fs.readFileSync(blogPath, "utf8");
   const marker = '<div class="grid grid-2">';
   const i = blog.indexOf(marker);
   if (i === -1) throw new Error("Could not find the blog grid marker in blog.html.");
   const at = i + marker.length;
-  const card = `\n        <a class="post" href="${slug}.html"><div class="date">${esc(pubdate)} · ${esc(category)}</div><h3>${esc(title)}</h3><p style="color:var(--muted);margin-top:8px;">${esc(excerpt)}</p></a>`;
+  const img = image ? `<img class="post-thumb" src="${image}" alt="${esc(title)}" loading="lazy">` : "";
+  const card = `\n        <a class="post" href="${slug}.html">${img}<div class="date">${esc(pubdate)} · ${esc(category)}</div><h3>${esc(title)}</h3><p style="color:var(--muted);margin-top:8px;">${esc(excerpt)}</p></a>`;
   blog = blog.slice(0, at) + card + blog.slice(at);
   fs.writeFileSync(blogPath, blog);
 }

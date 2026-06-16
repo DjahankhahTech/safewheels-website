@@ -79,6 +79,7 @@ section { padding: 66px 0; }
 /* Blog teasers */
 .post { display: block; background:#fff; border:1px solid var(--line); border-radius: var(--radius); padding: 22px; box-shadow: var(--shadow); }
 .post:hover { text-decoration: none; transform: translateY(-2px); transition: transform .1s ease; }
+.post-thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; margin: -22px -22px 14px; width: calc(100% + 44px); display: block; border-top-left-radius: var(--radius); border-top-right-radius: var(--radius); }
 .post .date { color: var(--gold-deep); font-weight: 700; font-size: .85rem; }
 .post h3 { margin: 6px 0 0; color: var(--ink); font-size: 1.1rem; }
 

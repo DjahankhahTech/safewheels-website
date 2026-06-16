@@ -121,7 +121,7 @@ async function maybeIgInspiration() {
     slug,
   });
   fs.writeFileSync(path.join(ROOT, slug + ".html"), page);
-  insertBlogCard({ slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate });
+  insertBlogCard({ slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate, image: heroImg });
 
   // Hand off to the Instagram step. The repo is private, so raw.githubusercontent.com
   // isn't public — use the live (Vercel) site URL, which serves img/ publicly. The IG
