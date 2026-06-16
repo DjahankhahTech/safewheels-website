@@ -2,9 +2,31 @@
 // a slow Ken-Burns zoom + the post title overlaid near the bottom, with audio
 // (assets/reel-music.mp3 if present, otherwise a silent track). Requires ffmpeg,
 // which is preinstalled on GitHub Actions ubuntu runners. Returns true on success.
-const { execFileSync } = require("child_process");
+const { execFileSync, execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
+
+// GitHub runners don't ship ffmpeg by default — install it (and a font) on demand.
+function ensureFfmpeg() {
+  try { execFileSync("ffmpeg", ["-version"], { stdio: "ignore" }); }
+  catch (_) {
+    try {
+      console.log("Installing ffmpeg…");
+      execSync("sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-dejavu-core", { stdio: "ignore" });
+      execFileSync("ffmpeg", ["-version"], { stdio: "ignore" });
+    } catch (e) { console.error("Could not install ffmpeg:", e.message); return false; }
+  }
+  return true;
+}
+
+function findFont() {
+  const candidates = [
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
+    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
+  ];
+  return candidates.find((f) => fs.existsSync(f)) || null;
+}
 
 // Wrap a title into short lines for the overlay.
 function wrap(text, maxChars = 22) {
@@ -20,7 +42,8 @@ function wrap(text, maxChars = 22) {
 }
 
 function generateReel({ imagePath, title, outPath }) {
-  const font = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf";
+  if (!ensureFfmpeg()) return false;
+  const font = findFont();
   const titleTxt = outPath + ".title.txt";
   fs.writeFileSync(titleTxt, wrap(title));
   const music = path.join(path.dirname(outPath), "..", "assets", "reel-music.mp3");
@@ -31,7 +54,8 @@ function generateReel({ imagePath, title, outPath }) {
     "scale=2160:3840:force_original_aspect_ratio=increase",
     "crop=2160:3840",
     `zoompan=z='min(zoom+0.0007,1.16)':d=${frames}:s=1080x1920:fps=${FPS}`,
-    `drawtext=fontfile=${font}:textfile=${titleTxt}:fontcolor=white:fontsize=58:line_spacing=14:box=1:boxcolor=black@0.5:boxborderw=28:x=(w-text_w)/2:y=h-text_h-210`,
+    // Only overlay the title if a font is available.
+    ...(font ? [`drawtext=fontfile=${font}:textfile=${titleTxt}:fontcolor=white:fontsize=58:line_spacing=14:box=1:boxcolor=black@0.5:boxborderw=28:x=(w-text_w)/2:y=h-text_h-210`] : []),
     "format=yuv420p",
   ].join(",");
 

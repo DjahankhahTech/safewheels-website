@@ -105,6 +105,9 @@ section { padding: 66px 0; }
 .site-footer h4 { color: var(--gold); margin: 0 0 12px; font-size: 1rem; }
 .site-footer ul { list-style: none; padding: 0; margin: 0; }
 .site-footer li { margin: 6px 0; }
+.social { margin-top: 16px; display: flex; gap: 14px; }
+.social a { color: #ddd3bf; display: inline-flex; align-items: center; transition: color .15s ease; }
+.social a:hover { color: var(--gold); }
 .footer-bottom { border-top: 1px solid #2c281f; margin-top: 30px; padding-top: 18px; font-size: .85rem; color: #8c8576; text-align: center; }
 
 @media (max-width: 860px) { .grid-3 { grid-template-columns: 1fr 1fr; } .footer-grid { grid-template-columns: 1fr 1fr; } }
