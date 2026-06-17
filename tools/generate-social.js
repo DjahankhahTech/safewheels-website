@@ -15,30 +15,31 @@ const RAW = "https://raw.githubusercontent.com/DjahankhahTech/safewheels-website
 
 const SOCIAL_TOOL = {
   name: "social_post",
-  description: "Return one short, engaging Instagram post for SafeWheels Rentals SWFL.",
+  description: "Return one short, engaging Instagram post for SafeWheels Rentals SWFL that ties into a current Southwest Florida event, season, or happening.",
   input_schema: {
     type: "object",
     required: ["type", "hook", "caption", "vehicle", "imagePrompt", "hashtags"],
     properties: {
-      type: { type: "string", enum: ["tip", "local-spot", "fleet-highlight"], description: "Kind of post." },
-      hook: { type: "string", description: "Very short on-image overlay text, max ~5 words, may include 1 emoji. e.g. 'Sunsets on Sanibel 🌅'" },
-      caption: { type: "string", description: "2-4 punchy, friendly sentences for the IG caption. No URLs. End with a soft nudge to rent a car for the trip. Do NOT mention a blog or 'read more'." },
+      type: { type: "string", enum: ["event", "seasonal", "local-spot", "fleet-highlight"], description: "Kind of post. Prefer 'event' or 'seasonal' — tie it to what's happening in SWFL now." },
+      hook: { type: "string", description: "Very short internal label, max ~5 words (not shown on the image)." },
+      caption: { type: "string", description: "2-4 punchy, friendly sentences for the IG caption. Tie it to a current/seasonal SWFL event, festival, market, holiday, or activity, and how having a rental car makes it easy to enjoy. No URLs. End with a soft nudge to rent a car. Do NOT mention a blog or 'read more'." },
       vehicle: { type: "string", description: "If type is fleet-highlight, which fleet vehicle: " + Object.keys(FLEET).join(", ") + ". Otherwise 'none'." },
-      imagePrompt: { type: "string", description: "Vivid photo prompt for a scenic Southwest Florida image (used unless this is a fleet-highlight)." },
-      hashtags: { type: "string", description: "8-12 relevant hashtags separated by spaces, including #SWFL #CapeCoral #FortMyers and trip-relevant ones." },
+      imagePrompt: { type: "string", description: "Vivid photo prompt for a scenic Southwest Florida image matching the post (used unless this is a fleet-highlight)." },
+      hashtags: { type: "string", description: "8-12 relevant hashtags separated by spaces, including #SWFL #CapeCoral #FortMyers plus event/season-relevant ones." },
     },
   },
 };
 
 async function generate() {
-  const sys = `You run the Instagram for SafeWheels Rentals SWFL, a family Turo car-rental business in Southwest Florida (Cape Coral / Fort Myers / Punta Gorda). Cars are rented EXCLUSIVELY via Turo; the company meets guests at PGD and RSW airports and delivers within 50 miles of ZIP 33955. Voice: warm, local, upbeat. Create a short standalone post — a quick local travel tip, a hidden-gem spot, or a fun fleet highlight. Never mention a street address.`;
+  const today = new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
+  const sys = `You run the Instagram for SafeWheels Rentals SWFL, a family Turo car-rental business in Southwest Florida (Cape Coral / Fort Myers / Punta Gorda). Cars are rented EXCLUSIVELY via Turo; the company meets guests at PGD and RSW airports and delivers within 50 miles of ZIP 33955. Voice: warm, local, upbeat. Each post should COMPLEMENT what's happening in Southwest Florida right now — the current season, a well-known recurring local event/festival/market, a holiday, or a timely seasonal activity — and connect it to the convenience of having a car. IMPORTANT: do NOT invent specific dates, times, or event details you're unsure of; keep references to the season or well-known recurring happenings (e.g. "stone crab season," "snowbird season," summer sunset cruises, holiday boat parades). Never mention a street address.`;
   const res = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
       model: MODEL, max_tokens: 1200, system: sys,
       tools: [SOCIAL_TOOL], tool_choice: { type: "tool", name: "social_post" },
-      messages: [{ role: "user", content: "Create today's Instagram post. Vary the topic and vibe from a typical day. Call social_post." }],
+      messages: [{ role: "user", content: `Today is ${today}. Create today's Instagram post tied to what's happening in Southwest Florida around now (current season or a well-known recurring event/activity). Vary the topic from a typical day. Call social_post.` }],
     }),
   });
   const json = await res.json();
