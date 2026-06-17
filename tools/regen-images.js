@@ -18,8 +18,9 @@ const SCENES = {
   "island-hopping-pine-island-matlacha-swfl": "The colorful Matlacha fishing village on Pine Island, artsy waterfront cottages and mangrove islands under blue sky",
 };
 
-(async () => {
-  if (!process.env.IMAGE_API_KEY) { console.error("IMAGE_API_KEY not set — cannot regenerate."); process.exit(1); }
+async function regenImages() {
+  if (!process.env.IMAGE_API_KEY) { console.log("IMAGE_API_KEY not set — skipping image regeneration."); return 0; }
+  let done = 0;
   for (const [slug, scene] of Object.entries(SCENES)) {
     const buf = await generateImage(`${scene}. ${SUFFIX}`);
     if (!buf) { console.error(`✗ ${slug}: generation failed, leaving existing image.`); continue; }
@@ -36,6 +37,14 @@ const SCENES = {
       if (after !== before) fs.writeFileSync(file, after);
     }
     console.log(`✓ ${slug} regenerated -> ${jpg}`);
+    done++;
   }
-  console.log("Done. Commit & push the updated img/blog/*.jpg, *.html, and blog.html.");
-})().catch((e) => { console.error(e.message || e); process.exit(1); });
+  return done;
+}
+
+module.exports = { regenImages };
+
+// Allow running directly: IMAGE_API_KEY=... node tools/regen-images.js
+if (require.main === module) {
+  regenImages().then((n) => console.log(`Done — ${n} image(s) regenerated.`)).catch((e) => { console.error(e.message || e); process.exit(1); });
+}

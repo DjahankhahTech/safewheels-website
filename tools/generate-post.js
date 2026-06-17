@@ -11,6 +11,7 @@ const path = require("path");
 const { ROOT, SITE, FLEET, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateImage } = require("./generate-image");
 const { generateReel } = require("./generate-reel");
+const { regenImages } = require("./regen-images");
 const { recentMedia, creds } = require("./instagram");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
@@ -134,6 +135,17 @@ async function maybeIgInspiration() {
       console.log("Generated Reel:", rp);
     }
   } catch (e) { console.error("Reel step skipped:", e.message); }
+
+  // One-time: upgrade the 6 older AI hero images to the realistic style. Self-disables
+  // via a flag file so it only runs on the first run after this was added.
+  const regenFlag = path.join(ROOT, "img", "blog", ".regen-v2-done");
+  if (!fs.existsSync(regenFlag)) {
+    try {
+      const n = await regenImages();
+      fs.writeFileSync(regenFlag, "done\n");
+      console.log(`One-time image regeneration complete (${n} images).`);
+    } catch (e) { console.error("Image regeneration skipped:", e.message); }
+  }
 
   // Hand off to the Instagram step. The repo is public, so raw.githubusercontent.com
   // serves the media instantly after push (no dependency on the Vercel deploy). For the

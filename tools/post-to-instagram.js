@@ -28,50 +28,30 @@ async function waitForUrl(url, timeoutMs = 330000, intervalMs = 10000) {
   if (!fs.existsSync(file)) { console.log("No last-published.json — nothing to cross-post."); return; }
   const post = JSON.parse(fs.readFileSync(file, "utf8"));
 
-  // Prefer the post's hero image once it's live; fall back to the (already-live) fleet photo.
-  let imageUrl = post.imagePublicUrl;
-  console.log(`Waiting for ${imageUrl} to be publicly available…`);
-  if (!(await waitForUrl(imageUrl))) {
-    if (post.fallbackImageUrl) {
-      console.log(`Hero image not live in time — using fallback ${post.fallbackImageUrl}`);
-      imageUrl = post.fallbackImageUrl;
-      if (!(await waitForUrl(imageUrl, 30000))) { console.error("Fallback image also unreachable — skipping IG post."); return; }
-    } else {
-      console.error("Image not reachable and no fallback — skipping IG post."); return;
-    }
-  }
-
-  try {
-    const id = await publishImage({ base: c.base, userId: c.userId, token: c.token, imageUrl, caption: post.igCaption });
-    console.log(`Posted to Instagram (media id ${id}): ${post.title}`);
-  } catch (e) {
-    // If the hero image was rejected by IG, retry once with the live fleet photo.
-    if (post.fallbackImageUrl && imageUrl !== post.fallbackImageUrl && (await waitForUrl(post.fallbackImageUrl, 30000))) {
-      try {
-        const id = await publishImage({ base: c.base, userId: c.userId, token: c.token, imageUrl: post.fallbackImageUrl, caption: post.igCaption });
-        console.log(`Posted to Instagram with fallback image (media id ${id}): ${post.title}`);
-        return;
-      } catch (e2) { console.error("Fallback IG post also failed (blog still published):", e2.message); return; }
-    }
-    // Don't fail the whole workflow if IG posting hiccups — the blog is already live.
-    console.error("Instagram cross-post failed (blog still published):", e.message);
-  }
-
-  // Also publish a Reel if one was generated. Try the instant raw URL first; if IG
-  // rejects it (e.g. content-type), fall back to the Vercel URL (proper video/mp4).
+  // Post ONE thing per blog: the Reel. The static photo is only a fallback for when
+  // no Reel could be generated (e.g. ffmpeg failed) or every Reel attempt is rejected.
   if (post.reelPublicUrl) {
-    const candidates = [post.reelPublicUrl, post.reelFallbackUrl].filter(Boolean);
-    let posted = false;
-    for (const url of candidates) {
+    for (const url of [post.reelPublicUrl, post.reelFallbackUrl].filter(Boolean)) {
       console.log(`Trying Reel from ${url} …`);
       if (!(await waitForUrl(url))) { console.error("Reel URL not live in time:", url); continue; }
       try {
         const rid = await publishReel({ base: c.base, userId: c.userId, token: c.token, videoUrl: url, caption: post.igCaption });
         console.log(`Posted Reel (media id ${rid}): ${post.title}`);
-        posted = true;
-        break;
+        return; // one post per blog — done.
       } catch (e) { console.error("Reel attempt failed:", e.message); }
     }
-    if (!posted) console.error("Reel not posted (blog + photo still published).");
+    console.error("Reel could not be posted — falling back to a photo.");
   }
+
+  // Fallback: post the static photo (hero image, else the live fleet photo).
+  for (const imageUrl of [post.imagePublicUrl, post.fallbackImageUrl].filter(Boolean)) {
+    console.log(`Trying photo from ${imageUrl} …`);
+    if (!(await waitForUrl(imageUrl))) { console.error("Photo URL not live in time:", imageUrl); continue; }
+    try {
+      const id = await publishImage({ base: c.base, userId: c.userId, token: c.token, imageUrl, caption: post.igCaption });
+      console.log(`Posted photo (media id ${id}): ${post.title}`);
+      return;
+    } catch (e) { console.error("Photo attempt failed:", e.message); }
+  }
+  console.error("Nothing posted to Instagram (blog still published).");
 })();
