@@ -1,0 +1,44 @@
+name: Daily Instagram social post
+
+on:
+  schedule:
+    - cron: "13 13 * * 0,2,4,6"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  social:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate the daily social post
+        env:
+          TZ: America/New_York
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BLOG_MODEL: ${{ vars.BLOG_MODEL }}
+          IMAGE_API_KEY: ${{ secrets.IMAGE_API_KEY }}
+        run: node tools/generate-social.js
+
+      - name: Commit & push
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name "safewheels-bot"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add -A
+            git commit -m "Daily social post (automated)"
+            git push
+          else
+            echo "Nothing to commit."
+          fi
+
+      - name: Post to Instagram
+        env:
+          META: ${{ secrets.META }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: node tools/post-to-instagram.js
