@@ -57,16 +57,21 @@ async function waitForUrl(url, timeoutMs = 330000, intervalMs = 10000) {
     console.error("Instagram cross-post failed (blog still published):", e.message);
   }
 
-  // Also publish a Reel if one was generated and is live.
+  // Also publish a Reel if one was generated. Try the instant raw URL first; if IG
+  // rejects it (e.g. content-type), fall back to the Vercel URL (proper video/mp4).
   if (post.reelPublicUrl) {
-    console.log(`Waiting for Reel ${post.reelPublicUrl} to be publicly available…`);
-    if (await waitForUrl(post.reelPublicUrl)) {
+    const candidates = [post.reelPublicUrl, post.reelFallbackUrl].filter(Boolean);
+    let posted = false;
+    for (const url of candidates) {
+      console.log(`Trying Reel from ${url} …`);
+      if (!(await waitForUrl(url))) { console.error("Reel URL not live in time:", url); continue; }
       try {
-        const rid = await publishReel({ base: c.base, userId: c.userId, token: c.token, videoUrl: post.reelPublicUrl, caption: post.igCaption });
+        const rid = await publishReel({ base: c.base, userId: c.userId, token: c.token, videoUrl: url, caption: post.igCaption });
         console.log(`Posted Reel (media id ${rid}): ${post.title}`);
-      } catch (e) { console.error("Reel post failed (blog + photo still published):", e.message); }
-    } else {
-      console.error("Reel not live in time — skipping Reel post.");
+        posted = true;
+        break;
+      } catch (e) { console.error("Reel attempt failed:", e.message); }
     }
+    if (!posted) console.error("Reel not posted (blog + photo still published).");
   }
 })();

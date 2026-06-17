@@ -135,17 +135,19 @@ async function maybeIgInspiration() {
     }
   } catch (e) { console.error("Reel step skipped:", e.message); }
 
-  // Hand off to the Instagram step. The repo is private, so raw.githubusercontent.com
-  // isn't public — use the live (Vercel) site URL, which serves img/ publicly. The IG
-  // step waits for the new image to deploy, and falls back to the already-live fleet photo.
+  // Hand off to the Instagram step. The repo is public, so raw.githubusercontent.com
+  // serves the media instantly after push (no dependency on the Vercel deploy). For the
+  // Reel we also pass the Vercel site URL as a fallback (it serves proper video/mp4).
+  const RAW = "https://raw.githubusercontent.com/DjahankhahTech/safewheels-website/main";
   const hashtags = "#SWFL #CapeCoral #FortMyers #PuntaGorda #Sanibel #Naples #TuroHost #CarRental #FloridaTravel #SnowbirdSeason";
   const igCaption = `${post.title}\n\n${post.excerpt}\n\n📖 Read it on our blog (link in bio) · 🚗 Book your SWFL ride on Turo.\n\n${hashtags}`;
   fs.writeFileSync(path.join(ROOT, "blog-queue", "last-published.json"), JSON.stringify({
     slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate,
     url: `${SITE}/${slug}.html`,
-    imagePublicUrl: `${SITE}/${heroImg}`,
-    fallbackImageUrl: `${SITE}/${vehicle.img}`,
-    reelPublicUrl: reelPath ? `${SITE}/${reelPath}` : null,
+    imagePublicUrl: `${RAW}/${heroImg}`,
+    fallbackImageUrl: `${RAW}/${vehicle.img}`,
+    reelPublicUrl: reelPath ? `${RAW}/${reelPath}` : null,
+    reelFallbackUrl: reelPath ? `${SITE}/${reelPath}` : null,
     igCaption,
   }, null, 2) + "\n");
 
