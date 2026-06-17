@@ -47,6 +47,14 @@ async function creds() {
     console.log("facebook /me/accounts ->", JSON.stringify(fb.json.error.message || fb.json.error));
   }
 
+  // Path A2: a (non-expiring) Page token -> /me is the Page itself, with its IG account.
+  const pg = await call("GET", FB, "/me", { fields: "instagram_business_account{id,username}", access_token: token });
+  if (pg.ok && pg.json.instagram_business_account && pg.json.instagram_business_account.id) {
+    console.log(`✓ Page-token path. IG id ${pg.json.instagram_business_account.id}`);
+    console.log("--- end diagnostic ---");
+    return { token, base: FB, userId: process.env.IG_USER_ID || pg.json.instagram_business_account.id };
+  }
+
   // Path B: Instagram-Login token -> direct IG user.
   const ig = await call("GET", IG, "/me", { fields: "user_id,username", access_token: token });
   if (ig.ok && (ig.json.user_id || ig.json.id)) {
