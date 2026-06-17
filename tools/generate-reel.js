@@ -41,13 +41,37 @@ function wrap(text, maxChars = 22) {
   return lines.join("\n");
 }
 
+// Generate a warm, license-safe background music bed (a soft major-chord pad) once,
+// so Reels have sound. Drop your own royalty-free assets/reel-music.mp3 to override.
+function ensureReelMusic(music) {
+  if (fs.existsSync(music)) return true;
+  try {
+    fs.mkdirSync(path.dirname(music), { recursive: true });
+    execFileSync("ffmpeg", [
+      "-y",
+      "-f", "lavfi", "-i", "sine=frequency=220:duration=16",     // A3 (bass)
+      "-f", "lavfi", "-i", "sine=frequency=329.63:duration=16",  // E4
+      "-f", "lavfi", "-i", "sine=frequency=440:duration=16",     // A4
+      "-f", "lavfi", "-i", "sine=frequency=554.37:duration=16",  // C#5  -> warm A-major pad
+      "-filter_complex",
+      "[0]volume=0.5[b];[1]volume=0.3[c];[2]volume=0.28[d];[3]volume=0.22[e];" +
+      "[b][c][d][e]amix=inputs=4:normalize=0,tremolo=f=4:d=0.22,aecho=0.8:0.88:80:0.35,lowpass=f=3000,afade=t=in:d=2,afade=t=out:st=14:d=2,volume=0.7",
+      "-ar", "44100", "-b:a", "128k", music,
+    ], { stdio: "pipe" });
+    return fs.existsSync(music);
+  } catch (e) {
+    console.error("Could not generate reel music (Reel will be silent):", e.stderr ? e.stderr.toString().slice(-300) : e.message);
+    return false;
+  }
+}
+
 function generateReel({ imagePath, title, outPath }) {
   if (!ensureFfmpeg()) return false;
   const font = findFont();
   const titleTxt = outPath + ".title.txt";
   fs.writeFileSync(titleTxt, wrap(title));
   const music = path.join(path.dirname(outPath), "..", "assets", "reel-music.mp3");
-  const hasMusic = fs.existsSync(music);
+  const hasMusic = ensureReelMusic(music);
 
   const DUR = 8, FPS = 30, frames = DUR * FPS;
   const vf = [
