@@ -30,6 +30,7 @@ async function creds() {
   if (!token) return null;
 
   console.log("--- IG diagnostic ---");
+  console.log(`META token length: ${token.length}, starts with: ${token.slice(0, 4)}`); // ~200=full FB token, 32=app secret, IGQ/EAA = type
 
   // Path A: Facebook token -> a Page with a linked instagram_business_account.
   const fb = await call("GET", FB, "/me/accounts", { fields: "id,name,instagram_business_account{id,username}", access_token: token });
