@@ -123,3 +123,14 @@ section { padding: 66px 0; }
 /* clickable fleet cards */
 a.fleet-card { text-decoration: none; color: inherit; }
 a.fleet-card:hover { text-decoration: none; transform: translateY(-3px); transition: transform .12s ease; box-shadow: 0 12px 30px rgba(33,29,23,.16); }
+
+/* guest reviews */
+.reviews-rating { margin-top: 6px; font-weight: 700; color: var(--muted); }
+.reviews-rating .stars-big { color: var(--gold-deep); font-size: 1.25rem; letter-spacing: 2px; vertical-align: middle; }
+.review-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 26px; box-shadow: var(--shadow); display: flex; flex-direction: column; text-align: left; }
+.review-stars { color: var(--gold-deep); letter-spacing: 2px; font-size: 1.05rem; }
+.review-text { margin: 10px 0 16px; font-style: italic; color: var(--ink); }
+.review-meta { color: var(--muted); font-size: .9rem; margin-top: auto; }
+.review-meta strong { color: var(--ink); }
+.reviews-cta { text-align: center; margin-top: 34px; }
+.section-reviews { background: var(--white); }

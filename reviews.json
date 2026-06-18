@@ -1,0 +1,9 @@
+{
+  "_comment": "SafeWheels guest reviews, sourced from the Turo host profile (turo.com/us/en/drivers/795431). Turo blocks scraping, so paste reviews here manually, then run: node tools/build-reviews.js  (this regenerates the on-site reviews section + star rich-snippet markup). 'summary.rating' = your overall Turo star rating; 'summary.reviewCount' = total ratings on Turo. Each review: name (guest first name), date (YYYY-MM-DD or 'Month YYYY'), rating (1-5), text (verbatim), vehicle (optional), featured (optional, true = show as a card on the site).",
+  "summary": {
+    "rating": null,
+    "tripCount": null,
+    "reviewCount": null
+  },
+  "reviews": []
+}
