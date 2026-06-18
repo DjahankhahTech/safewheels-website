@@ -37,6 +37,12 @@ const LD_TARGETS = ['index.html'];
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const stars = (n) => '★★★★★☆☆☆☆☆'.slice(5 - Math.round(n), 10 - Math.round(n));
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+// ISO YYYY-MM-DD -> "Mon D, YYYY" for display; passthrough if not ISO.
+const fmtDate = (d) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(d));
+  return m ? `${MONTHS[+m[2] - 1]} ${+m[3]}, ${m[1]}` : d;
+};
 
 function replaceRegion(html, tag, inner) {
   const start = `<!-- ${tag}:START -->`;
@@ -62,7 +68,7 @@ function buildSection(data) {
       (rev) => `        <figure class="review-card">
           <div class="review-stars" aria-label="${rev.rating} out of 5 stars">${stars(rev.rating)}</div>
           <blockquote class="review-text">&ldquo;${esc(rev.text)}&rdquo;</blockquote>
-          <figcaption class="review-meta"><strong>${esc(rev.name)}</strong>${rev.vehicle ? ' · ' + esc(rev.vehicle) : ''}<br>${esc(rev.date)}${rev.source ? ' · ' + esc(rev.source) : ' · Turo'}</figcaption>
+          <figcaption class="review-meta"><strong>${esc(rev.name)}</strong>${rev.vehicle ? ' · ' + esc(rev.vehicle) : ''}<br>${esc(fmtDate(rev.date))}${rev.source ? ' · ' + esc(rev.source) : ' · Turo'}</figcaption>
         </figure>`
     )
     .join('\n');

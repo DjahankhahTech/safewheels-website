@@ -1,9 +1,37 @@
 {
-  "_comment": "SafeWheels guest reviews, sourced from the Turo host profile (turo.com/us/en/drivers/795431). Turo blocks scraping, so paste reviews here manually, then run: node tools/build-reviews.js  (this regenerates the on-site reviews section + star rich-snippet markup). 'summary.rating' = your overall Turo star rating; 'summary.reviewCount' = total ratings on Turo. Each review: name (guest first name), date (YYYY-MM-DD or 'Month YYYY'), rating (1-5), text (verbatim), vehicle (optional), featured (optional, true = show as a card on the site).",
+  "_comment": "SafeWheels guest reviews from the Turo host profile (turo.com/us/en/drivers/795431). Turo blocks scraping, so reviews are maintained by hand here. After editing, run: node tools/build-reviews.js  (regenerates the on-site reviews section + star rich-snippet markup). date = ISO YYYY-MM-DD (used for Google structured data; displayed as 'Mon D, YYYY'). featured: true = shown as a card on the site (up to 6). summary.rating = overall Turo star rating; summary.reviewCount = total ratings on Turo.",
   "summary": {
-    "rating": null,
-    "tripCount": null,
-    "reviewCount": null
+    "rating": 5.0,
+    "reviewCount": 362
   },
-  "reviews": []
+  "reviews": [
+    {"name": "Anthony", "date": "2026-06-14", "rating": 5, "text": "Awesome - will book again - thanks Alex!"},
+    {"name": "Matthew", "date": "2026-06-14", "rating": 5, "featured": true, "text": "Painless experience, very good communication. Vehicle was very nice would use again."},
+    {"name": "Shideh", "date": "2026-06-07", "rating": 5, "text": "All in all an excellent experience, a good car and a very responsive host."},
+    {"name": "Christa", "date": "2026-06-05", "rating": 5, "text": "Thank you for making this so easy!"},
+    {"name": "Aaron", "date": "2026-06-05", "rating": 5, "featured": true, "text": "Vehicle was clean and everything that we needed. Drop off and pickup was very easy and communication with host was great."},
+    {"name": "Maureen", "date": "2026-05-28", "rating": 5, "text": "Perfect little car in great shape. Host very easy to work with. Will rent from this host again."},
+    {"name": "Christopher", "date": "2026-05-27", "rating": 5, "text": "Great vehicle. Awesome Owner! A great experience. Thank you. It was a pleasure."},
+    {"name": "Emily", "date": "2026-05-27", "rating": 5, "featured": true, "text": "The car was perfect and the host was amazing! We changed the location of pickup last minute, had a delayed flight, needed to extend our trip and the host was very accommodating and responded immediately. I would definitely use them again!"},
+    {"name": "Brett David", "date": "2026-05-26", "rating": 5, "text": "Amazing communication and great car."},
+    {"name": "Korbin", "date": "2026-05-23", "rating": 5, "text": "Great host. Nice car!"},
+    {"name": "James", "date": "2026-05-23", "rating": 5, "featured": true, "text": "The car Alex provided was top-notch. Clean, great gas mileage and drove like a dream. Extremely reasonable price too! Wouldn't hesitate on this vehicle (or Alex) again! Pickup simply couldn't have been easier."},
+    {"name": "Jocelyn", "date": "2026-05-21", "rating": 5, "text": "The jeep was absolutely beautiful, we decided to change our flights and return times and the host was extremely helpful and accommodating, even offered to help us with getting another rental when we were thinking about staying on our vacation longer. Extremely satisfied with our experience and will book this Jeep again in the future. Beautiful jeep!"},
+    {"name": "Dique'e", "date": "2026-05-17", "rating": 5, "text": "Everything was perfect, car was just as described. Clean and very nice to ride, host was very easy to communicate with, will definitely rent again."},
+    {"name": "Nicole", "date": "2026-05-12", "rating": 5, "featured": true, "text": "Great car and communication! Everything was exceptional! Car was immaculate and the car seat that was provided for my daughter was perfect. Would highly recommend!"},
+    {"name": "James", "date": "2026-05-11", "rating": 5, "text": "Car and communication were great. Would rent again."},
+    {"name": "Mason", "date": "2026-05-11", "rating": 5, "text": "Experience was perfect, easy pick up, easy drop off. Clean, reliable car. Good vibes, good ride! Will use again!"},
+    {"name": "Heather", "date": "2026-05-11", "rating": 5, "text": "Alex was very responsive. Our vehicle was in great condition."},
+    {"name": "Joseph", "date": "2026-05-07", "rating": 5, "text": "Alex made everything so smooth for our trip. Very nice vehicle!"},
+    {"name": "Joseph", "date": "2026-05-05", "rating": 5, "text": "Very accommodating provider, I highly recommend. Great experience, will definitely rent again from this provider."},
+    {"name": "Shane", "date": "2026-05-02", "rating": 5, "text": "Great car, easy pick up, great communication with host."},
+    {"name": "Kevin", "date": "2026-04-26", "rating": 5, "text": "This experience was so smooth and seamless. The car was clean and drove well."},
+    {"name": "Eva", "date": "2026-04-21", "rating": 5, "featured": true, "text": "Everything went very smoothly!! Pickup information was detailed and simple and the car drove perfectly! Alex had reached out during my trip as well to make sure no issues came up! Would definitely rebook for my next trip!"},
+    {"name": "Roy", "date": "2026-04-19", "rating": 5, "text": "All excellent."},
+    {"name": "Michael", "date": "2026-04-12", "rating": 5, "text": "Alex is a fantastic host! Nice car. Easy in and out. Awesome communication and directions from Alex."},
+    {"name": "Randy", "date": "2026-04-06", "rating": 5, "text": "Great experience! Vehicle was clean and well maintained. Pick up and drop off couldn't have been easier! A++"},
+    {"name": "Daniel", "date": "2026-04-06", "rating": 5, "text": "Good car."},
+    {"name": "Andrew", "date": "2026-04-02", "rating": 5, "text": "Car was clean and on time. Pleasure to rent from."},
+    {"name": "Michele", "date": "2026-03-29", "rating": 5, "text": "Thanks again! Great vehicle and worked well for us."}
+  ]
 }
