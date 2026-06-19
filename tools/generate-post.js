@@ -10,7 +10,6 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, FLEET, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateImage } = require("./generate-image");
-const { generateReel } = require("./generate-reel");
 const { regenImages } = require("./regen-images");
 const { recentMedia, creds } = require("./instagram");
 
@@ -125,16 +124,9 @@ async function maybeIgInspiration() {
   fs.writeFileSync(path.join(ROOT, slug + ".html"), page);
   insertBlogCard({ slug, title: post.title, excerpt: post.excerpt, category: post.category, pubdate, image: heroImg });
 
-  // Build an Instagram Reel from the hero image (committed alongside the post).
-  let reelPath = null;
-  try {
-    fs.mkdirSync(path.join(ROOT, "reels"), { recursive: true });
-    const rp = `reels/${slug}.mp4`;
-    if (generateReel({ imagePath: path.join(ROOT, heroImg), title: post.title, outPath: path.join(ROOT, rp) })) {
-      reelPath = rp;
-      console.log("Generated Reel:", rp);
-    }
-  } catch (e) { console.error("Reel step skipped:", e.message); }
+  // Instagram posts go out as a plain static photo (no music / no video) per user
+  // preference. The Reel/music path is intentionally disabled.
+  const reelPath = null;
 
   // One-time: upgrade the 6 older AI hero images to the realistic style. Self-disables
   // via a flag file so it only runs on the first run after this was added.

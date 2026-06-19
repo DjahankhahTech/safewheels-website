@@ -8,7 +8,6 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, TURO, FLEET, resolveVehicle } = require("./lib");
 const { generateImage } = require("./generate-image");
-const { generateReel } = require("./generate-reel");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
 const RAW = "https://raw.githubusercontent.com/DjahankhahTech/safewheels-website/main";
@@ -72,15 +71,9 @@ async function generate() {
     } else { heroImg = fallbackImg; console.log("Used fleet photo (no AI image)."); }
   }
 
-  // Reel from the image with the short hook overlaid + music.
-  let reelPath = null;
-  try {
-    fs.mkdirSync(path.join(ROOT, "reels"), { recursive: true });
-    const rp = `reels/${slug}.mp4`;
-    if (generateReel({ imagePath: path.join(ROOT, heroImg), title: post.hook, outPath: path.join(ROOT, rp) })) {
-      reelPath = rp; console.log("Generated social Reel:", rp);
-    }
-  } catch (e) { console.error("Reel step skipped:", e.message); }
+  // Instagram posts go out as a plain static photo (no music / no video) per user
+  // preference. The Reel/music path is intentionally disabled.
+  const reelPath = null;
 
   const igCaption = `${post.caption}\n\n🚗 Rent your SWFL ride on Turo — link in bio.\n\n${post.hashtags}`;
   fs.writeFileSync(path.join(ROOT, "blog-queue", "last-published.json"), JSON.stringify({
