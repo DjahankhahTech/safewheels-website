@@ -8,9 +8,7 @@
 //                IMAGE_API_KEY (+ IMAGE_API_URL / IMAGE_MODEL) -> AI hero images
 const fs = require("fs");
 const path = require("path");
-const { ROOT, SITE, FLEET, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
-const { generateImage } = require("./generate-image");
-const { regenImages } = require("./regen-images");
+const { ROOT, SITE, FLEET, resolveVehicle, pickRealPhoto, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateReel } = require("./generate-reel");
 const { recentMedia, creds } = require("./instagram");
 
@@ -97,19 +95,11 @@ async function maybeIgInspiration() {
 
   const vehicle = resolveVehicle(post.vehicle) || FLEET.telluride;
 
-  // Hero image: AI-generated if enabled, otherwise the real fleet photo for the vehicle.
-  let heroImg = vehicle.img;
-  const aiBuf = await generateImage(
-    `${post.heroImagePrompt}. Professional travel photograph shot on a full-frame DSLR with a 35mm lens, natural golden-hour Southwest Florida daylight, photorealistic with sharp focus, realistic textures, true-to-life colors and subtle depth of field — like a real travel-magazine photo. NOT an illustration, painting, cartoon, or 3D render. No text, no watermark, no logos, no readable license plates.`
-  );
-  if (aiBuf) {
-    fs.mkdirSync(path.join(ROOT, "img", "blog"), { recursive: true });
-    heroImg = `img/blog/${slug}.jpg`; // JPEG — Instagram only reliably accepts JPEG
-    fs.writeFileSync(path.join(ROOT, heroImg), aiBuf);
-    console.log("Used AI-generated hero image.");
-  } else {
-    console.log(`Used fleet photo: ${vehicle.img}`);
-  }
+  // Hero image: a REAL photo of this post's vehicle (authentic, never AI). Falls back to
+  // the vehicle's stock fleet photo when we don't have a premium shot of that model.
+  const photo = pickRealPhoto(vehicle.key);
+  const heroImg = (photo && photo.file) || vehicle.img;
+  console.log(`Used real photo: ${heroImg} (${vehicle.name})`);
 
   const pubdate = todayPretty();
   const page = renderPostPage({
@@ -135,17 +125,6 @@ async function maybeIgInspiration() {
       console.log("Generated silent video:", rp);
     }
   } catch (e) { console.error("Video step skipped:", e.message); }
-
-  // One-time: upgrade the 6 older AI hero images to the realistic style. Self-disables
-  // via a flag file so it only runs on the first run after this was added.
-  const regenFlag = path.join(ROOT, "img", "blog", ".regen-v2-done");
-  if (!fs.existsSync(regenFlag)) {
-    try {
-      const n = await regenImages();
-      fs.writeFileSync(regenFlag, "done\n");
-      console.log(`One-time image regeneration complete (${n} images).`);
-    } catch (e) { console.error("Image regeneration skipped:", e.message); }
-  }
 
   // Hand off to the Instagram step. The repo is public, so raw.githubusercontent.com
   // serves the media instantly after push (no dependency on the Vercel deploy). For the

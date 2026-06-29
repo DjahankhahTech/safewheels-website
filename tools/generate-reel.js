@@ -24,14 +24,21 @@ function ensureFfmpeg() {
 function generateReel({ imagePath, title, outPath }) {
   if (!ensureFfmpeg()) return false;
   const DUR = 7;
-  const vf = "scale=1080:1350:force_original_aspect_ratio=increase,crop=1080:1350,format=yuv420p";
+  // 4:5 (1080x1350) frame. To keep the WHOLE vehicle visible in a landscape photo,
+  // fill the frame with a blurred zoomed copy and center the full sharp image on top
+  // (the polished Instagram look — no cropping the car's nose/tail off).
+  const fc =
+    "[0:v]split=2[bg][fg];" +
+    "[bg]scale=1080:1350:force_original_aspect_ratio=increase,crop=1080:1350,boxblur=26:3,eq=brightness=-0.06[bgb];" +
+    "[fg]scale=1080:1350:force_original_aspect_ratio=decrease[fgs];" +
+    "[bgb][fgs]overlay=(W-w)/2:(H-h)/2,format=yuv420p[v]";
 
   // Silent audio track (Instagram still expects an audio stream on the video).
   const args = ["-y", "-loop", "1", "-framerate", "30", "-i", imagePath];
   args.push("-f", "lavfi", "-t", String(DUR), "-i", "anullsrc=channel_layout=stereo:sample_rate=44100");
   args.push(
-    "-vf", vf,
-    "-map", "0:v:0", "-map", "1:a:0",
+    "-filter_complex", fc,
+    "-map", "[v]", "-map", "1:a:0",
     "-t", String(DUR),
     "-c:v", "libx264", "-profile:v", "high", "-pix_fmt", "yuv420p", "-r", "30",
     "-c:a", "aac", "-b:a", "128k", "-shortest",

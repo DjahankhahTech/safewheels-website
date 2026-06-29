@@ -33,6 +33,31 @@ function resolveVehicle(key) {
   return null;
 }
 
+// Authentic real DSLR photos of the fleet for social posts (img/social/photos.json,
+// each {file, vehicle}). Using these real photos — not AI images — is what keeps the
+// posts looking genuine, and guarantees every post shows an actual fleet vehicle.
+function realPhotos() {
+  try { return JSON.parse(fs.readFileSync(path.join(ROOT, "img/social/photos.json"), "utf8")); }
+  catch { return []; }
+}
+const _rand = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+// Vehicle keys that have at least one real photo (so callers can prefer them).
+function realPhotoVehicles() { return [...new Set(realPhotos().map((p) => p.vehicle))]; }
+
+// Pick an authentic photo that ALWAYS shows a real fleet vehicle. With a vehicleKey:
+// a real photo of that vehicle if we have one, else that vehicle's stock fleet photo
+// (still the correct, real car). Without one: a random real (premium) photo.
+function pickRealPhoto(vehicleKey) {
+  const all = realPhotos();
+  if (vehicleKey) {
+    const pool = all.filter((p) => p.vehicle === vehicleKey);
+    if (pool.length) return _rand(pool);
+    if (FLEET[vehicleKey]) return { file: FLEET[vehicleKey].img, vehicle: vehicleKey };
+  }
+  return all.length ? _rand(all) : null;
+}
+
 // Build the full blog post page, matching the site's existing template exactly.
 function renderPostPage({ title, metaDescription, category, pubdate, bodyHtml, heroImg, heroAlt, slug }) {
   const canonical = `${SITE}/${slug}.html`;
@@ -138,4 +163,4 @@ function todayPretty() {
   return new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/New_York" });
 }
 
-module.exports = { ROOT, SITE, TURO, FLEET, esc, resolveVehicle, renderPostPage, insertBlogCard, existingTitles, todayPretty };
+module.exports = { ROOT, SITE, TURO, FLEET, esc, resolveVehicle, realPhotos, realPhotoVehicles, pickRealPhoto, renderPostPage, insertBlogCard, existingTitles, todayPretty };
