@@ -74,5 +74,33 @@
   {
     "file": "img/social/real-wrangler-3.jpg",
     "vehicle": "wrangler"
+  },
+  {
+    "file": "img/social/real-santafe-1.jpg",
+    "vehicle": "santafe"
+  },
+  {
+    "file": "img/social/real-santafe-2.jpg",
+    "vehicle": "santafe"
+  },
+  {
+    "file": "img/social/real-santafe-3.jpg",
+    "vehicle": "santafe"
+  },
+  {
+    "file": "img/social/real-santafe-4.jpg",
+    "vehicle": "santafe"
+  },
+  {
+    "file": "img/fleet/chevy-traverse.jpg",
+    "vehicle": "traverse"
+  },
+  {
+    "file": "img/fleet/hyundai-elantra.jpg",
+    "vehicle": "elantra"
+  },
+  {
+    "file": "img/fleet/hyundai-kona.jpg",
+    "vehicle": "kona"
   }
 ]
