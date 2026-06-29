@@ -10,6 +10,7 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, FLEET, resolveVehicle, pickRealPhoto, renderPostPage, insertBlogCard, existingTitles, todayPretty } = require("./lib");
 const { generateReel } = require("./generate-reel");
+const { generateImage } = require("./generate-image");
 const { recentMedia, creds } = require("./instagram");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
@@ -95,11 +96,27 @@ async function maybeIgInspiration() {
 
   const vehicle = resolveVehicle(post.vehicle) || FLEET.telluride;
 
-  // Hero image: a REAL photo of this post's vehicle (authentic, never AI). Falls back to
-  // the vehicle's stock fleet photo when we don't have a premium shot of that model.
+  // Hero image: AI-generate a fresh SWFL scene of THIS post's vehicle, using a REAL photo
+  // of that vehicle as the reference ("training data") so the car stays authentic. The real
+  // photo is never published directly — if AI generation is unavailable we fall back to it.
   const photo = pickRealPhoto(vehicle.key);
-  const heroImg = (photo && photo.file) || vehicle.img;
-  console.log(`Used real photo: ${heroImg} (${vehicle.name})`);
+  const refImg = (photo && photo.file) || vehicle.img;
+  let heroImg = refImg;
+  try {
+    const aiPrompt = `Photorealistic, scenic Southwest Florida travel photo of this EXACT ${vehicle.name} — keep its real make, model, body shape, color and trim from the reference image, unchanged. Scene: ${post.heroImagePrompt}. Natural golden-hour light, full-frame DSLR look, sharp focus, realistic reflections and depth, true-to-life colors — looks like a real photo, NOT an illustration, render, or stock image. No added text, watermark, logos, or readable license plate.`;
+    const buf = await generateImage(aiPrompt, [path.join(ROOT, refImg)]);
+    if (buf) {
+      const out = `img/blog/${slug}.jpg`;
+      fs.mkdirSync(path.join(ROOT, "img/blog"), { recursive: true });
+      fs.writeFileSync(path.join(ROOT, out), buf);
+      heroImg = out;
+      console.log(`AI hero generated from real ${vehicle.name} reference (${refImg}) -> ${out}`);
+    } else {
+      console.log(`AI hero unavailable — using real photo: ${heroImg} (${vehicle.name})`);
+    }
+  } catch (e) {
+    console.error("AI hero step failed, using real photo:", e.message);
+  }
 
   const pubdate = todayPretty();
   const page = renderPostPage({

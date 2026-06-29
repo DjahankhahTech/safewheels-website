@@ -8,6 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { ROOT, SITE, TURO, FLEET, pickRealPhoto } = require("./lib");
 const { generateReel } = require("./generate-reel");
+const { generateImage } = require("./generate-image");
 
 const MODEL = process.env.BLOG_MODEL || "claude-sonnet-4-6";
 const RAW = "https://raw.githubusercontent.com/DjahankhahTech/safewheels-website/main";
@@ -17,11 +18,12 @@ const SOCIAL_TOOL = {
   description: "Return one short, engaging Instagram post for SafeWheels Rentals SWFL that ties into a current Southwest Florida event, season, or happening.",
   input_schema: {
     type: "object",
-    required: ["type", "hook", "caption", "hashtags"],
+    required: ["type", "hook", "caption", "imagePrompt", "hashtags"],
     properties: {
       type: { type: "string", enum: ["event", "seasonal", "local-spot", "fleet-highlight"], description: "Kind of post. Prefer 'event' or 'seasonal' — tie it to what's happening in SWFL now." },
       hook: { type: "string", description: "Very short internal label, max ~5 words (not shown on the image)." },
       caption: { type: "string", description: "2-4 punchy, friendly sentences for the IG caption. The post's PHOTO shows a specific fleet vehicle (named in the prompt) — work that exact vehicle naturally into the caption (e.g. 'roll up to the festival in our Kia Telluride'). Tie it to a current/seasonal SWFL event, festival, market, holiday, or activity, and how having that car makes it easy to enjoy. No URLs. End with a soft nudge to rent. Do NOT mention a blog or 'read more'." },
+      imagePrompt: { type: "string", description: "A vivid SCENE description (one sentence) for where the named vehicle is shown — a real Southwest Florida setting that fits the post (e.g. 'parked along a palm-lined Cape Coral waterfront at golden hour' or 'at a sunny Fort Myers farmers-market street'). Describe ONLY the setting/lighting/mood, NOT the car itself (the car comes from a real reference photo). No people in focus, no text or signage." },
       hashtags: { type: "string", description: "8-12 relevant hashtags separated by spaces, including #SWFL #CapeCoral #FortMyers plus event/season-relevant ones." },
     },
   },
@@ -48,17 +50,33 @@ async function generate(vehicleName) {
 
 (async () => {
   if (!process.env.ANTHROPIC_API_KEY) { console.error("ANTHROPIC_API_KEY is not set."); process.exit(1); }
-  // Lead with a REAL photo of an actual fleet vehicle (no AI), then write the caption
-  // around it — guarantees every post shows a real car and looks authentic.
+  // Pick a REAL photo of an actual fleet vehicle to use as the AI REFERENCE ("training
+  // data"), then write the caption around that vehicle and AI-generate a fresh scene that
+  // keeps the real car. The real photo is never posted directly — it only guides the model.
   const photo = pickRealPhoto();
   const vehName = (FLEET[photo.vehicle] || {}).name || "fleet car";
   const post = await generate(vehName);
 
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" }); // YYYY-MM-DD
   const slug = `social-${today}`;
-  const heroImg = photo.file;
+  const refPath = path.join(ROOT, photo.file);   // real photo = reference + fallback
   const fallbackImg = (FLEET[photo.vehicle] || FLEET.telluride).img;
-  console.log(`Using real photo: ${heroImg} (${vehName})`);
+
+  let heroImg = photo.file; // fall back to the real photo if AI generation is unavailable
+  try {
+    const aiPrompt = `Photorealistic, candid Instagram travel photo of this EXACT ${vehName} — keep its real make, model, body shape, color and trim from the reference image, unchanged. Place it in this Southwest Florida setting: ${post.imagePrompt}. Natural ${post.type === "seasonal" ? "warm seasonal" : "golden-hour"} light, full-frame DSLR look, sharp focus, realistic depth and reflections, true-to-life colors — looks like a real photo a local owner snapped, NOT an illustration, render, or stock image. No added text, watermark, logos, or readable license plate.`;
+    const buf = await generateImage(aiPrompt, [refPath]);
+    if (buf) {
+      const out = `img/social/${slug}.jpg`;
+      fs.writeFileSync(path.join(ROOT, out), buf);
+      heroImg = out;
+      console.log(`AI image generated from real ${vehName} reference (${photo.file}) -> ${out}`);
+    } else {
+      console.log(`AI image unavailable — posting the real photo: ${heroImg} (${vehName})`);
+    }
+  } catch (e) {
+    console.error("AI image step failed, using real photo:", e.message);
+  }
 
   // SILENT video (no music) from the image.
   let reelPath = null;
